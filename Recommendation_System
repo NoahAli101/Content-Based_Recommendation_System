@@ -1,0 +1,37 @@
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
+
+# Sample data for movies, books, and music
+data = {
+    'Title': ['Movie A', 'Movie B', 'Book X', 'Book Y', 'Song P', 'Song Q'],
+    'Genre': ['Action', 'Drama', 'Fiction', 'Mystery', 'Pop', 'Rock']
+}
+
+df = pd.DataFrame(data)
+
+# Create a TF-IDF vectorizer
+tfidf_vectorizer = TfidfVectorizer()
+
+# Compute the TF-IDF matrix
+tfidf_matrix = tfidf_vectorizer.fit_transform(df['Genre'])
+
+# Compute the cosine similarity
+cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
+
+# Function to get recommendations based on user input
+def get_recommendations(title, cosine_sim=cosine_sim):
+    idx = df.index[df['Title'] == title].tolist()[0]
+    sim_scores = list(enumerate(cosine_sim[idx]))
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    sim_scores = sim_scores[1:4]  # Get top 3 recommendations
+    recommendations = [df['Title'][i] for i, _ in sim_scores]
+    return recommendations
+
+# Test the recommendation system
+user_input = input("Enter a movie, book, or song title: ")
+recommendations = get_recommendations(user_input)
+
+print("Recommended for you:")
+for recommendation in recommendations:
+    print(recommendation)
